@@ -4,6 +4,12 @@ A Streamlit web app that uses a machine learning model to predict whether a pers
 
 Built for the **Rocheston RCAI Classroom Project (Module 40 – AI Driven Healthcare)**.
 
+## 🌐 Live Demo
+
+👉 **[Try the app here](https://ai-diabetes-risk-app-hpxaem7qmmmdqouiezntqe.streamlit.app/)** — hosted on Streamlit Community Cloud, no installation needed.
+
+> 💤 If the app has not been used for a while it goes to sleep. Click the wake-up button and give it a minute to start.
+
 ## ✨ Features
 
 - 📝 Four simple inputs: **Glucose**, **Blood Pressure**, **BMI** and **Age**
