@@ -199,6 +199,13 @@
   );
   -webkit-mask-image: repeating-linear-gradient(to bottom, #000 0 6px, transparent 6px 12px);
   mask-image: repeating-linear-gradient(to bottom, #000 0 6px, transparent 6px 12px);
+  /* Each stripe is narrower than the one above, like a reflection on water */
+  clip-path: polygon(
+    0 0, 100% 0, 100% 12px, 94% 12px, 94% 24px, 88% 24px, 88% 36px, 82% 36px,
+    82% 48px, 76% 48px, 76% 60px, 70% 60px, 70% 100%,
+    30% 100%, 30% 60px, 24% 60px, 24% 48px, 18% 48px, 18% 36px, 12% 36px,
+    12% 24px, 6% 24px, 6% 12px, 0 12px
+  );
 }
 
 .hero .hero-text {
