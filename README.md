@@ -8,10 +8,34 @@ Built for the **Rocheston RCAI Classroom Project (Module 40 – AI Driven Health
 
 - 📝 Four simple inputs: **Glucose**, **Blood Pressure**, **BMI** and **Age**
 - 🤖 Prediction from a pre-trained K-Nearest Neighbors model (`Diabetesmodel.pkl`)
-- 🚦 Three risk levels (**Low**, **Moderate**, **High**) with an estimated risk percentage and a suggestion for each
+- 🚦 Three risk levels (**Low**, **Moderate**, **High**) shown on a result card with an estimated risk percentage, a segmented risk bar and a suggestion for each
 - 🔍 A breakdown of how each entered value compares with healthy reference ranges
 - 📊 A **Model Comparison** tab with a metrics table and accuracy chart for four algorithms, plus a model picker that shows each model's confusion matrix and explains its accuracy, precision, recall and F1 score
 - 🛡️ Friendly error messages for empty or invalid inputs
+- 🎮 A pixel-art sunset design with a retro game feel
+
+## 🎮 Design
+
+The app uses a pixel-art theme inspired by retro game title screens:
+
+- 🌅 A sunset sky in hard colour bands (purple, magenta and deep indigo) with a dotted dither pattern
+- ☀️ A hero banner with a striped pixel sun, clouds and stars, drawn entirely in CSS
+- 🔤 Pixel fonts: **Press Start 2P** for headings and buttons, **VT323** for body text
+- 🟨 Square panels, thick borders and hard drop shadows on the form, tables, tabs and metric cards
+- 📊 Charts recoloured to match the palette
+
+| Colour | Hex | Used for |
+|---|---|---|
+| 🟣 Sky purple | `#8f6fe3` | Background sky |
+| 💗 Magenta | `#e326d3` | Background horizon, dither dots |
+| 🔵 Deep indigo | `#2b1d73` | Main panel |
+| 🌑 Night | `#1b1150` | Cards, form and shadows |
+| 🟡 Sun yellow | `#ffc400` | Buttons, highlights, moderate risk |
+| 🌸 Cloud pink | `#ff8fb0` | Borders, labels, chart bars |
+| 🟢 Mint | `#5cf2a6` | Low risk |
+| 🔴 Coral red | `#ff5c7a` | High risk |
+
+> 💡 The pixel fonts are loaded from Google Fonts, so they need an internet connection. Offline, the app falls back to a plain monospace font.
 
 ## 🧠 The Model
 
@@ -45,6 +69,9 @@ Two changes were made from the original notebook:
 ```
 ai-diabetes-risk-app/
 ├── app.py                 # 🖥️ Streamlit frontend
+├── style.css              # 🎨 Pixel-art theme (fonts, colours, hero banner)
+├── .streamlit/
+│   └── config.toml        # 🌈 Streamlit theme colours
 ├── train.py               # 🏋️ Trains the models and saves Diabetesmodel.pkl
 ├── Diabetesmodel.pkl      # 🤖 Trained model (scaler + KNN)
 ├── model_metrics.json     # 📊 Test metrics of the four models
@@ -120,7 +147,7 @@ After a prediction, a table shows each value entered, its category (for example 
 
 ## 🛠️ Tech Stack
 
-🐍 Python · 🎈 Streamlit · 🔬 scikit-learn · 🐼 pandas · 🔢 NumPy · 📈 Matplotlib
+🐍 Python · 🎈 Streamlit · 🔬 scikit-learn · 🐼 pandas · 🔢 NumPy · 📈 Matplotlib · 🎨 CSS
 
 ## ⚠️ Disclaimer
 
