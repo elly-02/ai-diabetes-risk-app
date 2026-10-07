@@ -3,6 +3,7 @@ import pickle
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -10,12 +11,61 @@ import streamlit as st
 BASE_DIR = Path(__file__).parent
 MODEL_PATH = BASE_DIR / "Diabetesmodel.pkl"
 METRICS_PATH = BASE_DIR / "model_metrics.json"
+STYLE_PATH = BASE_DIR / "style.css"
 
 # Risk level boundaries on the predicted probability of diabetes
 MODERATE_RISK = 0.30
 HIGH_RISK = 0.60
 
 STATUS_ICON = {"ok": "🟢", "warn": "🟡", "high": "🔴"}
+
+# Pixel-art sunset palette, shared with style.css
+INDIGO = "#2b1d73"
+NIGHT = "#1b1150"
+VIOLET = "#7b5ce0"
+MAGENTA = "#e326d3"
+PINK = "#ff8fb0"
+SUN = "#ffc400"
+MINT = "#5cf2a6"
+DANGER = "#ff5c7a"
+WHITE = "#ffffff"
+
+RISK_BAR_SEGMENTS = 20
+
+HERO_HTML = """
+<div class="hero">
+  <div class="stars"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="cloud c4"></div>
+  <div class="sun"></div>
+  <div class="reflection"></div>
+  <div class="hero-text">
+    <h1>AI DIABETES<br>RISK ASSESSMENT</h1>
+    <div class="tagline">ENTER YOUR STATS &middot; PRESS PREDICT</div>
+  </div>
+</div>
+"""
+
+plt.rcParams.update(
+    {
+        "font.family": "monospace",
+        "font.weight": "bold",
+        "axes.labelweight": "bold",
+        "axes.titleweight": "bold",
+        "figure.facecolor": NIGHT,
+        "axes.facecolor": NIGHT,
+        "savefig.facecolor": NIGHT,
+        "text.color": WHITE,
+        "axes.labelcolor": WHITE,
+        "axes.edgecolor": WHITE,
+        "axes.linewidth": 2,
+        "xtick.color": WHITE,
+        "ytick.color": WHITE,
+    }
+)
+MATRIX_CMAP = LinearSegmentedColormap.from_list("sunset", [INDIGO, MAGENTA, SUN])
 
 st.set_page_config(page_title="AI Diabetes Risk Assessment", page_icon="🩺")
 
@@ -24,6 +74,10 @@ st.set_page_config(page_title="AI Diabetes Risk Assessment", page_icon="🩺")
 def load_model():
     with open(MODEL_PATH, "rb") as f:
         return pickle.load(f)
+
+
+def load_style():
+    return STYLE_PATH.read_text(encoding="utf-8")
 
 
 @st.cache_data
@@ -70,24 +124,40 @@ def age_category(value):
 
 def show_risk_level(probability):
     if probability >= HIGH_RISK:
-        st.error("🔴 **High risk** — you are **likely** to have diabetes.")
+        level, color = "HIGH RISK", DANGER
+        verdict = "You are <b>likely</b> to have diabetes."
         advice = (
             "Please see a doctor soon for a proper diabetes test, such as a "
             "fasting glucose or HbA1c test."
         )
     elif probability >= MODERATE_RISK:
-        st.warning("🟡 **Moderate risk** — you **may be at risk** of diabetes.")
+        level, color = "MODERATE RISK", SUN
+        verdict = "You <b>may be at risk</b> of diabetes."
         advice = (
             "Consider a check-up with a healthcare professional, and look at "
             "diet, physical activity and weight management."
         )
     else:
-        st.success("🟢 **Low risk** — you are **not likely** to have diabetes.")
+        level, color = "LOW RISK", MINT
+        verdict = "You are <b>not likely</b> to have diabetes."
         advice = "Keep up a healthy lifestyle and continue with routine health checks."
 
-    st.metric("Estimated risk", f"{probability * 100:.0f} %")
-    st.progress(float(probability))
-    st.write(f"**Suggestion:** {advice}")
+    filled = round(probability * RISK_BAR_SEGMENTS)
+    segments = "".join(
+        f'<span class="{"on" if i < filled else ""}"></span>' for i in range(RISK_BAR_SEGMENTS)
+    )
+    st.markdown(
+        f"""
+        <div class="result-card" style="--level: {color}">
+          <div class="level">{level}</div>
+          <div class="verdict">{verdict}</div>
+          <div class="score">{probability * 100:.0f}%<small>ESTIMATED RISK</small></div>
+          <div class="risk-bar">{segments}</div>
+          <div class="advice"><b>Suggestion:</b> {advice}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def show_value_breakdown(glucose, blood_pressure, bmi, age):
@@ -114,7 +184,7 @@ def show_value_breakdown(glucose, blood_pressure, bmi, age):
             for metric, value, (status, label), reference in rows
         ]
     )
-    st.dataframe(table, hide_index=True, width="stretch")
+    st.table(table.set_index("Metric"))
     st.caption(
         "Glucose is the 2-hour reading from an oral glucose tolerance test and "
         "blood pressure is the diastolic (lower) reading, matching the data the "
@@ -214,14 +284,14 @@ def show_model_comparison():
             for name, m in models.items()
         ]
     )
-    st.dataframe(table, hide_index=True, width="stretch")
+    st.table(table.set_index("Model"))
 
     names = list(models)
     accuracies = [models[name]["accuracy"] * 100 for name in names]
     fig, ax = plt.subplots(figsize=(7, 3.5))
-    colors = ["#ff4b4b" if name == deployed else "#9aa5b1" for name in names]
-    bars = ax.bar(names, accuracies, color=colors)
-    ax.bar_label(bars, fmt="%.1f%%", padding=3)
+    colors = [SUN if name == deployed else PINK for name in names]
+    bars = ax.bar(names, accuracies, color=colors, edgecolor=WHITE, linewidth=2)
+    ax.bar_label(bars, fmt="%.1f%%", padding=3, color=WHITE)
     ax.set_ylim(0, 100)
     ax.set_ylabel("Accuracy (%)")
     ax.set_title("Test accuracy by algorithm")
@@ -247,15 +317,15 @@ def show_model_comparison():
         st.markdown("**Confusion matrix**")
         labels = ["Not diabetic", "Diabetic"]
         fig, ax = plt.subplots(figsize=(4.5, 3.8))
-        ax.imshow(matrix, cmap="Blues")
+        ax.imshow(matrix, cmap=MATRIX_CMAP)
         ax.set_xticks([0, 1], labels=labels)
         ax.set_yticks([0, 1], labels=labels)
         ax.set_xlabel("Predicted")
         ax.set_ylabel("Actual")
         for i in range(2):
             for j in range(2):
-                color = "white" if matrix[i, j] > matrix.max() / 2 else "black"
-                ax.text(j, i, matrix[i, j], ha="center", va="center", color=color, fontsize=14)
+                color = NIGHT if matrix[i, j] > matrix.max() * 0.75 else WHITE
+                ax.text(j, i, matrix[i, j], ha="center", va="center", color=color, fontsize=16)
         fig.tight_layout()
         st.pyplot(fig)
         plt.close(fig)
@@ -296,7 +366,8 @@ def show_model_comparison():
     st.caption(f"Features used: {', '.join(summary['features'])}.")
 
 
-st.title("AI Diabetes Risk Assessment")
+st.markdown(f"<style>{load_style()}</style>", unsafe_allow_html=True)
+st.markdown(HERO_HTML, unsafe_allow_html=True)
 
 if not MODEL_PATH.exists():
     st.error("Diabetesmodel.pkl was not found. Run `python train.py` first to create it.")
