@@ -187,12 +187,18 @@
   width: 130px;
   height: 22%;
   margin-left: -65px;
-  background: repeating-linear-gradient(
+  /* One solid colour per stripe, fading from sun orange down to sea blue */
+  background: linear-gradient(
     to bottom,
-    var(--orange) 0 6px,
-    transparent 6px 12px
+    var(--orange) 0 12px,
+    #f47f6e 12px 24px,
+    #c97fb4 24px 36px,
+    #8f8cf0 36px 48px,
+    #62a0ff 48px 60px,
+    #4fb8ff 60px 100%
   );
-  opacity: 0.9;
+  -webkit-mask-image: repeating-linear-gradient(to bottom, #000 0 6px, transparent 6px 12px);
+  mask-image: repeating-linear-gradient(to bottom, #000 0 6px, transparent 6px 12px);
 }
 
 .hero .hero-text {
